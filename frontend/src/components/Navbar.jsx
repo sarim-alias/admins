@@ -1,28 +1,24 @@
-'use client';
-import React, { useState } from 'react';
-import Image from 'next/image';
-import little from '../../public/little.png';
-import { Search } from 'lucide-react';
+// Imports.
+"use client";
+import React, { useState } from "react";
+import Image from "next/image";
+import little from "../../public/little.png";
+import { Search } from "lucide-react";
+import ModeToggle from "./ModeToggle";
+import Link from "next/link";
 
+// Frontend.
 const Navbar = () => {
-  const [active, setActive] = useState('');
-  const [toggle, setToggle] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-
-  const navLinks = [
-    { id: 'home', title: 'Home' },
-    { id: 'about', title: 'About' },
-    { id: 'contact', title: 'Contact' },
-  ];
+  const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <nav className="w-full flex items-center py-5 fixed top-0 z-20 bg-darkest">
       <div className="w-full flex justify-between items-center max-w-7xl mx-auto px-4">
-        {/* Logo Section */}
+        {/* Logo */}
         <div className="flex-shrink-0">
-          <Image 
-            src={little} 
-            alt="logo" 
+          <Image
+            src={little}
+            alt="logo"
             className="w-24 h-auto object-contain"
             priority
           />
@@ -42,20 +38,22 @@ const Navbar = () => {
           </div>
         </div>
 
-      {/* Links. */}
-        <ul className="hidden sm:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <li
-              key={link.id}
-              className={`${
-                active === link.title ? "text-white" : "text-gray-200"
-              } hover:text-white text-[18px] font-medium cursor-pointer`}
-              onClick={() => setActive(link.title)}
-            >
-              {link.title}
-            </li>
-          ))}
-        </ul>
+        {/* Login, Signup, Toggle */}
+        <div className="flex items-center gap-4">
+          <Link
+            href="/login"
+            className="px-8 py-2  text-white bg-gray-700 hover:bg-gray-600 rounded-[30px] transition"
+          >
+            Login
+          </Link>
+          <Link
+            href="/signup"
+            className="px-8 py-2 text-white bg-blue-600 hover:bg-blue-500 rounded-[30px] transition"
+          >
+            Sign Up
+          </Link>
+          <ModeToggle />
+        </div>
       </div>
     </nav>
   );

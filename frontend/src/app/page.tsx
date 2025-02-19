@@ -1,9 +1,9 @@
-import Navbar from "@/components/Navbar";
+import ModeToggle from "@/components/ModeToggle";
 
 export default function Home() {
   return (
     <div>
-        <Navbar/>
+
     </div>
   );
 }
