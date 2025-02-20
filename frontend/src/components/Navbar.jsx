@@ -16,12 +16,14 @@ const Navbar = () => {
       <div className="w-full flex justify-between items-center max-w-7xl mx-auto px-4">
         {/* Logo */}
         <div className="flex-shrink-0">
-          <Image
-            src={little}
-            alt="logo"
-            className="w-24 h-auto object-contain"
-            priority
-          />
+        <Link href="/" passHref legacyBehavior>
+            <Image
+              src={little}
+              alt="logo"
+              className="w-24 h-auto object-contain cursor-pointer"
+              priority
+            />
+          </Link>
         </div>
 
         {/* Search Bar */}
