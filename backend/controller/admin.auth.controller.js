@@ -57,12 +57,12 @@ export const adminSignup = async (req, res) => {
 
 export const adminLogin = async (req, res) => {
     try {
-        const { name, password } = req.body;
-        const admin = await Admin.findOne({name});
+        const { email, password } = req.body;
+        const admin = await Admin.findOne({email});
         const isPasswordCorrect = await bcrypt.compare(password, admin?.password || "");
 
         if (!admin || !isPasswordCorrect) {
-            return res.status(400).json({error: "invalid username or password"});
+            return res.status(400).json({error: "Invalid email or password."});
         }
 
         generateTokenAndSetCookie(admin._id, res);
