@@ -1,32 +1,42 @@
 import React from "react";
-import "./App.css";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
 import Login from "./Auth/Login/Login";
 import Dashboard from "./components/Dashboard/Dashboard";
 import Navbar from "./components/Navbar/Navbar";
+import Sidebar from "./components/Sidebar/Sidebar";
+import Game from "./components/Game/Game";
 
-// Function to check authentication
+
 const isAuthenticated = () => !!localStorage.getItem("jwt");
-
-// Protected Route Component
 const ProtectedRoute = ({ element }) => {
   return isAuthenticated() ? element : <Navigate to="/login" replace />;
 };
 
 function App() {
-  const location = useLocation(); // Get current route
+  const location = useLocation();
+  const showLayout = location.pathname !== "/login"; 
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br bg-gray-900">
-      {/* Show Navbar only if the path is NOT "/login" */}
-      {location.pathname !== "/login" && <Navbar />}
-
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
-      </Routes>
+    <>
+      <ToastContainer position="top-right" autoClose={3000} />
+    <div className="flex flex-col min-h-screen bg-gray-900">
+      {showLayout && <Navbar />}
+      
+      <div className="flex flex-grow">
+        {showLayout && <Sidebar />} 
+        
+        <div className="flex-grow p-4">
+          <Routes>
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
+            <Route path="/game" element={<ProtectedRoute element={<Game />} />} />
+          </Routes>
+        </div>
+      </div>
     </div>
+    </>
   );
 }
 

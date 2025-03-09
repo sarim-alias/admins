@@ -1,4 +1,6 @@
 import React from "react";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Navbar = () => {
   const handleLogout = async () => {
@@ -7,27 +9,31 @@ const Navbar = () => {
         method: "POST",
         credentials: "include",
       });
-  
+
       const data = await response.json();
       if (response.ok) {
-        localStorage.removeItem("jwt"); // Clear token
-        alert(data.message);
-        window.location.href = "/login"; // Redirect to login page
+        localStorage.removeItem("jwt"); 
+        toast.success("Logged out successfully! 🍪");
+
+        setTimeout(() => {
+          window.location.href = "/login"; 
+        }, 1500);
       } else {
-        alert("Logout failed: " + data.error);
+        toast.error("Logout failed: " + (data.error || "Unknown error"));
       }
     } catch (error) {
       console.error("Logout error:", error);
-      alert("Something went wrong!");
+      toast.error("Something went wrong!");
     }
   };
 
   return (
-    <nav className="flex items-center justify-between bg-gray-900 text-white px-6 py-4 shadow-md">
-      <h1 className="text-3xl text-rose-400 font-bold">Navbar 🖼️⭐</h1>
+    <nav className="flex items-center justify-between bg-[#28293d] text-white px-6 py-4 shadow-md">
+      <img alt="LittleGames" src="/logo.png" className="w-32 h-auto object-contain" />
+      <h1 className="text-xl text-white font-bold">Navbar 🖼️⭐🍪</h1>
       <button
         onClick={handleLogout}
-        className="bg-white text-black border border-gray-400 px-5 py-2 rounded-lg shadow-md hover:bg-gray-200 transition-all font-bold"
+        className="loginBtn text-white font-bold py-2 px-6 rounded-full shadow-md hover:bg-gray-700 transition"
       >
         Logout
       </button>

@@ -3,6 +3,7 @@ import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/auth.routes.js"
+import gameRoutes from "./routes/game.routes.js"
 import connectToMongoDB from "./db/connectToMongoDB.js";
 import cors from "cors";
 
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 
 // Routing.
 app.use("/api/auth", authRoutes);
+app.use("/api/games", gameRoutes);
   
 // Server.
 app.listen(PORT, () => {
