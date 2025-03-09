@@ -7,6 +7,7 @@ const Dashboard = () => {
     <div className="relative h-screen p-5">
        <ToastContainer position="top-right" autoClose={3000} />
       <h1 className="text-xl text-white font-semibold">Dashboard ⭐</h1>
+      <p></p>
     </div>
   );
 };
