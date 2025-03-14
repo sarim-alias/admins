@@ -6,6 +6,7 @@ import Dashboard from "./components/Dashboard/Dashboard";
 import Navbar from "./components/Navbar/Navbar";
 import Sidebar from "./components/Sidebar/Sidebar";
 import Game from "./components/Game/Game";
+import Categories from "./components/Categories/Categories";
 
 
 const isAuthenticated = () => !!localStorage.getItem("jwt");
@@ -32,6 +33,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/dashboard" element={<ProtectedRoute element={<Dashboard />} />} />
             <Route path="/game" element={<ProtectedRoute element={<Game />} />} />
+            <Route path="/categories" element={<ProtectedRoute element={<Categories />} />} />
           </Routes>
         </div>
       </div>

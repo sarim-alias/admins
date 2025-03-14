@@ -7,7 +7,19 @@ const gameSchema = new mongoose.Schema({
   },
   description: {
     type: String
-  }}, { timestamps: true });
+  },
+  iframeUrl: {
+    type: String
+  },
+  imageUrl: {
+    type: String
+  },
+  category: {
+    type: String,
+    required: true,
+    enum: ["Featured", "New", "Driving", "Casual", "2 Player"],
+  },
+}, { timestamps: true });
 
 const Game = mongoose.model("Game", gameSchema);
 
