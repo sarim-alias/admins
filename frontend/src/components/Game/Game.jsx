@@ -77,7 +77,7 @@ const Game = () => {
 
             {/* iframe URL */}
             <div className="mb-4">
-              <label htmlFor="iframeUrl" className="block text-gray-300 mb-1">iframe Url</label>
+              <label htmlFor="iframeUrl" className="block text-gray-300 mb-1">iframes Url</label>
               <Field id="iframeUrl" name="iframeUrl" type="text" className="w-full p-2 border rounded bg-gray-700 text-white focus:ring-2 focus:ring-indigo-500" />
               <ErrorMessage name="iframeUrl" component="p" className="text-red-400 text-sm mt-1" />
             </div>
