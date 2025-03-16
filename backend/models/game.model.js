@@ -19,6 +19,14 @@ const gameSchema = new mongoose.Schema({
     required: true,
     enum: ["Featured", "New", "Driving", "Casual", "2 Player"],
   },
+  likes: {
+    type: Number,
+    default: 15000 
+  },
+  dislikes: {
+    type: Number,
+    default: 1000 
+  }
 }, { timestamps: true });
 
 const Game = mongoose.model("Game", gameSchema);

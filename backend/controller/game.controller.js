@@ -1,5 +1,6 @@
 // Imports.
 import Game from "../models/game.model.js";
+import mongoose from "mongoose";
 const validCategories = ["Featured", "New", "Driving", "Casual", "2 Player"];
 
 // gameCreate.
@@ -44,6 +45,8 @@ export const gameCreate = async (req, res) => {
           iframeUrl: newGame.iframeUrl,
           imageUrl: newGame.imageUrl,
           category: newGame.category,
+          likes: newGame.likes,
+          dislikes: newGame.dislikes,
       });
 
   } catch (error) {
@@ -128,17 +131,80 @@ export const updateGameById = async (req, res) => {
 
 // getGameByTitle.
 export const getGameByTitle = async (req, res) => {
-    try {
+  try {
       const { title } = req.params;
-      const game = await Game.findOne({ title });
+
+      if (!Game) {
+          console.error("Game model is not defined");
+          return res.status(500).json({ error: "Game model error" });
+      }
+
+      const foundGames = await Game.find({ title: { $regex: title, $options: "i" } });
+
+      if (!foundGames || foundGames.length === 0) {
+          return res.status(404).json({ error: "No matching games found" });
+      }
+
+      res.status(200).json(foundGames);
+  } catch (error) {
+      console.error("Error fetching game by title:", error.message);
+      res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+// likeGame.
+export const likeGame = async (req, res) => {
+    try {
+      const { id } = req.params;
   
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid Game ID" });
+      }
+  
+      const game = await Game.findById(id);
       if (!game) {
         return res.status(404).json({ error: "Game not found" });
       }
   
-      res.status(200).json(game);
+      game.likes += 1;
+      await game.save();
+  
+      res.status(200).json({
+        message: "Game liked successfully!",
+        likes: game.likes,
+        dislikes: game.dislikes,
+      });
     } catch (error) {
-      console.error("Error fetching game by title:", error.message);
+      console.error("Error liking game:", error.message);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+  
+// dislikeGame.
+export const dislikeGame = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ error: "Invalid Game ID" });
+      }
+  
+      const game = await Game.findById(id);
+      if (!game) {
+        return res.status(404).json({ error: "Game not found" });
+      }
+  
+      game.dislikes += 1;
+      await game.save();
+  
+      res.status(200).json({
+        message: "Game disliked successfully!",
+        likes: game.likes,
+        dislikes: game.dislikes,
+      });
+    } catch (error) {
+      console.error("Error disliking game:", error.message);
       res.status(500).json({ error: "Internal Server Error" });
     }
 };
