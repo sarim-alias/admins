@@ -1,11 +1,12 @@
 import React from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Navbar = () => {
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/auth/admin/logout", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/admin/logout`, {
         method: "POST",
         credentials: "include",
       });
