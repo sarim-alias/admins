@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Game = () => {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -32,7 +33,7 @@ const Game = () => {
       formData.append("category", values.category)
       formData.append("image", selectedFile); // ✅ Append file
 
-      const response = await fetch("http://localhost:5000/api/games/game/create", {
+      const response = await fetch(`${API_BASE_URL}/api/games/game/create`, {
         method: "POST",
         body: formData, 
       });
