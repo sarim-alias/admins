@@ -90,7 +90,7 @@ const Categories = () => {
         onChange={(e) => setSelectedGame(e.target.value)}
         value={selectedGame}
       >
-        <option value="">Select a Game</option>
+        <option value="">Select a Games</option>
         {games.map((game) => (
           <option key={game._id} value={game._id}>
             {game.title}
