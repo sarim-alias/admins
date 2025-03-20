@@ -121,7 +121,7 @@ const Navbar = ({ onSearch }) => {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full bg-[#28293d] py-2 px-6 shadow-lg z-40 flex items-center">
+      <div className="fixed top-0 left-0 w-full bg-[#28293d] py-2 px-6 shadow-lg z-40 flex items-center">
         {/* Logo */}
         <div className="p-2 rounded-xl shadow-lg cursor-pointer" onClick={() => navigate("/")}>
           <img
@@ -192,7 +192,7 @@ const Navbar = ({ onSearch }) => {
 </div>
 
 
-      </header>
+      </div>
 
       {/* Login & Signup Modals */}
       <LoginModel open={loginOpen} setOpen={setLoginOpen} setSignupOpen={setSignupOpen} />
