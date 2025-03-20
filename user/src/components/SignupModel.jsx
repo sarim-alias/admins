@@ -1,23 +1,59 @@
 import React, { useState } from "react";
-import { Button, Form, Input, Drawer, Checkbox } from "antd";
+import axios from "axios";
+import { Button, Drawer, Checkbox } from "antd";
 import { CloseOutlined, LeftOutlined } from "@ant-design/icons";
+import { toast, ToastContainer } from "react-toastify";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import "react-toastify/dist/ReactToastify.css";
+
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const SignupModel = ({ open, setOpen, setLoginOpen }) => {
-  const [form] = Form.useForm();
-  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
-  const [isChecked, setIsChecked] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLoginRedirect = () => {
-    setOpen(false);
-    setLoginOpen(true); // No delay needed
-  };
+  const formik = useFormik({
+    initialValues: {
+      fullName: "",
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      gender: "",
+      termsAccepted: false,
+    },
+    validationSchema: Yup.object({
+      fullName: Yup.string().required("Full name is required"),
+      username: Yup.string().required("Username is required"),
+      email: Yup.string().email("Invalid email").required("Email is required"),
+      password: Yup.string().required("Password is required"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("password"), null], "Passwords must match")
+        .required("Confirm password is required"),
+      gender: Yup.string().required("Gender is required"),
+      termsAccepted: Yup.boolean().oneOf([true], "You must accept the terms"),
+    }),
+    onSubmit: async (values) => {
+      setLoading(true);
+      try {
+        const response = await axios.post(`${API_BASE_URL}/api/auth/signup`, values, {
+          withCredentials: true,
+        });
 
-  const handleFormChange = () => {
-    form
-      .validateFields()
-      .then(() => setIsButtonDisabled(!isChecked))
-      .catch(() => setIsButtonDisabled(true));
-  };
+        if (response.status === 201) {
+          toast.success("Signup successful! 🎉");
+          localStorage.setItem("jwt", response.data.token);
+          setTimeout(() => {
+            setOpen(false);
+            setLoginOpen(true);
+          }, 1500);
+        }
+      } catch (error) {
+        toast.error(error.response?.data?.error || "Signup failed. Try again.");
+      }
+      setLoading(false);
+    },
+  });
 
   return (
     <Drawer
@@ -28,85 +64,122 @@ const SignupModel = ({ open, setOpen, setLoginOpen }) => {
       width={400}
       className="custom-drawer bg-gray-900 relative transition-all duration-300 ease-in-out"
     >
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+      
       <div className="absolute top-4 left-4 cursor-pointer" onClick={() => setOpen(false)}>
         <LeftOutlined className="text-white text-2xl" />
       </div>
       <div className="absolute top-4 right-4 cursor-pointer" onClick={() => setOpen(false)}>
         <CloseOutlined className="text-white text-2xl" />
       </div>
-
       <div className="p-6 pt-12">
         <h3 className="text-center text-white font-bold text-2xl mb-6">Sign up</h3>
         <p className="text-center text-white text-lg font-semibold mb-4">Create a free account</p>
 
-        <Form form={form} name="signupForm" layout="vertical" onChange={handleFormChange}>
-          <Form.Item name="email" rules={[{ required: true, type: "email", message: "Please enter a valid email!" }]}>
-            <Input placeholder="Email" className="custom-input" />
-          </Form.Item>
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
+          <input
+            type="text"
+            name="fullName"
+            placeholder="Full Name"
+            className="custom-input"
+            {...formik.getFieldProps("fullName")}
+          />
+          {formik.touched.fullName && formik.errors.fullName && (
+            <p className="text-red-500 text-sm">{formik.errors.fullName}</p>
+          )}
 
-          <Form.Item
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            className="custom-input"
+            {...formik.getFieldProps("username")}
+          />
+          {formik.touched.username && formik.errors.username && (
+            <p className="text-red-500 text-sm">{formik.errors.username}</p>
+          )}
+
+          <input
+            type="email"
+            name="email"
+            placeholder="Email"
+            className="custom-input"
+            {...formik.getFieldProps("email")}
+          />
+          {formik.touched.email && formik.errors.email && (
+            <p className="text-red-500 text-sm">{formik.errors.email}</p>
+          )}
+
+          <input
+            type="password"
             name="password"
-            rules={[
-              { required: true, message: "Please enter your password!" },
-              { min: 6, message: "Password must be at least 6 characters" },
-            ]}
-          >
-            <Input.Password placeholder="Password" className="custom-input" />
-          </Form.Item>
+            placeholder="Password"
+            className="custom-input"
+            {...formik.getFieldProps("password")}
+          />
+          {formik.touched.password && formik.errors.password && (
+            <p className="text-red-500 text-sm">{formik.errors.password}</p>
+          )}
 
-          <Form.Item
+          <input
+            type="password"
             name="confirmPassword"
-            dependencies={["password"]}
-            rules={[
-              { required: true, message: "Please confirm your password!" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error("Passwords do not match!"));
-                },
-              }),
-            ]}
+            placeholder="Confirm Password"
+            className="custom-input"
+            {...formik.getFieldProps("confirmPassword")}
+          />
+          {formik.touched.confirmPassword && formik.errors.confirmPassword && (
+            <p className="text-red-500 text-sm">{formik.errors.confirmPassword}</p>
+          )}
+
+          <select
+            name="gender"
+            className="custom-input"
+            value={formik.values.gender}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
           >
-            <Input.Password placeholder="Confirm password" className="custom-input" />
-          </Form.Item>
+            <option value="" disabled>Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+          {formik.touched.gender && formik.errors.gender && (
+            <p className="text-red-500 text-sm">{formik.errors.gender}</p>
+          )}
 
-          <p className="text-sm text-gray-500 mb-4">
-            Passwords must be at least 6 characters and include both letters and numbers
-          </p>
-
-          <Form.Item>
+          <div className="flex items-center gap-2">
             <Checkbox
-              className="text-gray-400"
-              checked={isChecked}
-              onChange={(e) => {
-                setIsChecked(e.target.checked);
-                handleFormChange();
-              }}
-            >
-              <span className="text-gray-400">I am 13 years (or the applicable minimum age) or older and accept the </span>{" "}
-              <span className="text-blue-400 cursor-pointer">terms and conditions</span> <span className="text-gray-400">and</span>{" "}
-              <span className="text-blue-400 cursor-pointer">privacy policy</span>
-            </Checkbox>
-          </Form.Item>
+              name="termsAccepted"
+              checked={formik.values.termsAccepted}
+              onChange={formik.handleChange}
+              className="text-white"
+            />
+            <span className="text-white">
+              I am 13 years (or the applicable minimum age) or older and accept
+              the terms and conditions and privacy policy
+            </span>
+          </div>
+          {formik.touched.termsAccepted && formik.errors.termsAccepted && (
+            <p className="text-red-500 text-sm">{formik.errors.termsAccepted}</p>
+          )}
 
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              className="custom-button bg-gray-600"
-              disabled={isButtonDisabled}
-            >
-              Continue
-            </Button>
-          </Form.Item>
-        </Form>
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="flex w-full justify-center rounded-md bg-[#6842ff] px-3 py-1.5 text-sm font-semibold text-white shadow-xs transition duration-200 hover:bg-[#4e2bbf] focus:outline-[#3c2196]"
+            loading={loading}
+            disabled={loading}
+          >
+            {loading ? "Signing up..." : "Sign Up"}
+          </Button>
+        </form>
 
         <p className="text-center text-white text-sm mt-4">
           Already have an account?{" "}
-          <span className="text-blue-400 cursor-pointer" onClick={handleLoginRedirect}>
+          <span className="text-blue-400 cursor-pointer" onClick={() => {
+            setOpen(false);
+            setLoginOpen(true);
+          }}>
             Log in
           </span>
         </p>

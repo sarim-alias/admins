@@ -30,6 +30,10 @@ const userSchema = new mongoose.Schema({
       type: String,
       default: "",
     },
+    termsAccepted: {
+      type: Boolean,
+      required: true,
+    },
     // createdAt, updatedAt
 }, { timestamps: true });
 
