@@ -1,16 +1,20 @@
-import React, { useEffect, useState } from "react";
-import { Button, Input, Drawer } from "antd";
+// Imports.
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { Button, Input, Drawer, message } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
+import { toast, ToastContainer } from "react-toastify";
+import { useFormik } from "formik";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook } from "react-icons/fa";
+import * as Yup from "yup";
+import "react-toastify/dist/ReactToastify.css";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
+// Frontend.
 const LoginModel = ({ open, setOpen, setSignupOpen }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
-
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
-    /* Load Google API */
     const script = document.createElement("script");
     script.src = "https://accounts.google.com/gsi/client";
     script.async = true;
@@ -22,8 +26,7 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
       client_id: "YOUR_GOOGLE_CLIENT_ID",
       callback: handleCredentialResponse,
     });
-
-    google.accounts.id.prompt(); // Show Google Sign-In popup
+    google.accounts.id.prompt();
   };
 
   const handleCredentialResponse = (response) => {
@@ -34,14 +37,13 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
 
   const decodeJwt = (token) => {
     try {
-      return JSON.parse(atob(token.split(".")[1])); // Decode JWT token
+      return JSON.parse(atob(token.split(".")[1]));
     } catch (e) {
       return null;
     }
   };
 
   useEffect(() => {
-    /* Load Facebook SDK */
     window.fbAsyncInit = function () {
       FB.init({
         appId: "YOUR_FACEBOOK_APP_ID",
@@ -50,7 +52,6 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
         version: "v18.0",
       });
     };
-
     const script = document.createElement("script");
     script.src = "https://connect.facebook.net/en_US/sdk.js";
     script.async = true;
@@ -70,30 +71,36 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
     );
   };
 
-  // Handle Email & Password changes
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
-    checkButtonState(e.target.value, password);
-  };
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: Yup.object({
+      email: Yup.string().email("Invalid email address").required("Email is required"),
+      password: Yup.string().required("Password is required"),
+    }),
+    onSubmit: async (values, { resetForm }) => {
+      setLoading(true);
+      try {
+        const response = await axios.post(
+          `${API_BASE_URL}/api/auth/login`,
+          values,
+          { 
+            withCredentials: true 
+          }
+        );
 
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value);
-    checkButtonState(email, e.target.value);
-  };
-
-  const checkButtonState = (email, password) => {
-    setIsButtonEnabled(email.trim() !== "" && password.trim() !== "");
-  };
-
-  const handleLogin = () => {
-    console.log("Logging in with:", { email, password });
-    // TODO: Add authentication logic here
-  };
-
-  const handleSignupRedirect = () => {
-    setOpen(false); // Close login modal
-    setSignupOpen(true); // Open signup modal
-  };
+        toast.success("Login successful! 🎮", { autoClose: 2000 });
+        console.log("User Data:", response.data);
+        setOpen(false);
+        resetForm();
+      } catch (error) {
+        toast.error(error.response?.data?.error || "Login failed. Try again.");
+      }
+      setLoading(false);
+    },
+  });
 
   return (
     <Drawer
@@ -104,89 +111,73 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
       width={400}
       className="bg-[#28293d] relative rounded-lg custom-drawer"
     >
-      {/* Close Button */}
+      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+
       <div className="absolute top-4 right-4">
-        <CloseOutlined
-          className="text-white text-2xl cursor-pointer"
-          onClick={() => setOpen(false)}
-        />
+        <CloseOutlined className="text-white text-2xl cursor-pointer" onClick={() => setOpen(false)} />
       </div>
 
       <div className="p-6 pt-12">
-        <h3 className="text-center text-white font-bold text-xl mb-6">
-          Log in or sign up
-        </h3>
+        <h3 className="text-center text-white font-bold text-xl mb-6">Log in or sign up</h3>
 
-        {/* Google Sign-In Button */}
         <button
           onClick={handleGoogleLogin}
           className="w-full flex items-center justify-center bg-white text-black py-2 rounded-full font-medium mb-4 shadow-md hover:bg-white"
-          style={{ cursor: "pointer", outline: "none" }}
         >
-          <FcGoogle className="text-xl mr-2" />
-          Sign in with Google
+          <FcGoogle className="text-xl mr-2" /> Sign in with Google
         </button>
 
-        {/* Facebook Sign-In Button */}
         <button
           onClick={handleFacebookLogin}
           className="w-full flex items-center justify-center bg-[#1877f2] text-white py-2 rounded-full font-medium mb-4 shadow-md hover:bg-[#1877f2]"
-          style={{ cursor: "pointer", outline: "none" }}
         >
-          <FaFacebook className="text-xl mr-2" />
-          Continue with Facebook
+          <FaFacebook className="text-xl mr-2" /> Continue with Facebook
         </button>
 
-        {/* OR Divider */}
         <div className="flex items-center my-4">
           <hr className="flex-1 border-gray-600" />
-          <span className="px-3 text-gray-400 text-center whitespace-nowrap">
-            OR
-          </span>
+          <span className="px-3 text-gray-400">OR</span>
           <hr className="flex-1 border-gray-600" />
         </div>
 
-        {/* Email Input */}
-        <Input
-          placeholder="Enter your email"
-          className="custom-input p-3 mb-4 bg-[#3b3c54] border-none text-white rounded-md placeholder-gray-400 focus:outline-none"
-          value={email}
-          onChange={handleEmailChange}
-        />
+        <form onSubmit={formik.handleSubmit} className="flex flex-col gap-4">
 
-        {/* Password Input */}
-        <Input.Password
-          placeholder="Enter your password"
-          className="custom-input p-3 mb-4 mt-3  bg-[#3b3c54] border-none text-white rounded-md placeholder-gray-400 focus:outline-none"
-          value={password}
-          onChange={handlePasswordChange}
-        />
+        {/* Email. */}
+          <input
+            type="email"
+            name="email"
+            placeholder="Enter your email"
+            className="custom-input"
+            {...formik.getFieldProps("email")}
+          />
+          {formik.touched.email && formik.errors.email && (
+            <p className="text-red-500 text-sm">{formik.errors.email}</p>
+          )}
 
-        {/* Log in Button */}
-        <Button
-          type="primary"
-          block
-          className={`py-1 rounded-full focus:outline-none custom-button ${
-            isButtonEnabled
-              ? "bg-blue-500 text-white cursor-pointer hover:bg-blue-600"
-              : "bg-gray-400 text-gray-200 cursor-not-allowed"
-          }`}
-          disabled={!isButtonEnabled}
-          onClick={handleLogin}
-          style={{ outline: "none" }}
-        >
-          Log in
-        </Button>
+        {/* Password. */}
+          <input
+            type="password"
+            name="password"
+            placeholder="Enter your password"
+            className="custom-input"
+            {...formik.getFieldProps("password")}
+          />
+          {formik.touched.password && formik.errors.password && (
+            <p className="text-red-500 text-sm">{formik.errors.password}</p>
+          )}
 
-        {/* Signup Redirect Link */}
-        <p className="text-center text-gray-400 mt-4">
-          Don't have an account?{" "}
-          <span
-            className="text-blue-500 cursor-pointer hover:underline"
-            onClick={handleSignupRedirect}
+          <Button
+            type="primary"
+            htmlType="submit"
+            className="flex w-full justify-center rounded-md bg-[#6842ff] px-3 py-1.5 text-sm font-semibold text-white shadow-xs transition duration-200 hover:!bg-[#4e2bbf] focus:!outline-[#3c2196]"
+            disabled={loading}
           >
-            Signup
-          </span>
+            {loading ? <div className="loader" /> : "Log In"}
+          </Button>
+        </form>
+
+        <p className="text-center text-gray-400 mt-4">
+          Don't have an account? <span className="text-blue-400 cursor-pointer hover:underline" onClick={() => { setOpen(false); setSignupOpen(true); }}>Signup</span>
         </p>
       </div>
     </Drawer>
