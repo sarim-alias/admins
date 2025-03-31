@@ -90,11 +90,21 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
             withCredentials: true 
           }
         );
+        console.log("API Response Data:", response.data); // Debugging step
 
-        toast.success("Login successful! 🎮", { autoClose: 2000 });
-        console.log("User Data:", response.data);
-        setOpen(false);
-        resetForm();
+        const { token, ...user } = response.data; // Ensure structure
+        console.log("User Data:", user); // Debugging step
+    
+        if (token && user) {
+          localStorage.setItem("jwt", token);
+          localStorage.setItem("user", JSON.stringify(user));
+    
+          console.log("Stored User:", localStorage.getItem("user")); // Debugging step
+          toast.success("Login successful! 🎮", { autoClose: 2000 });
+    
+          setOpen(false);
+          resetForm();
+        }
       } catch (error) {
         toast.error(error.response?.data?.error || "Login failed. Try again.");
       }

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { IoSearch } from "react-icons/io5";
-import { FaRegHeart } from "react-icons/fa";
+import { FaRegHeart, FaUserCircle } from "react-icons/fa";
 import { useNavigate, useLocation } from "react-router-dom";
 import LoginModel from "./LoginModel.jsx"; // Import LoginModel
 import SignupModel from "./SignupModel.jsx";
 import GameTabs from "./GameTabs.jsx";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
@@ -15,8 +16,10 @@ const Navbar = ({ onSearch }) => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [signupOpen, setSignupOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false); // State for GamesDrawer
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [profileDropdown, setProfileDropdown] = useState(false);
   const dropdownRef = useRef(null);
+
 
   const games = [
     { id: 1, title: "Hills of Steel", image: "https://littlegames.gg/wp-content/uploads/2024/05/Hills-of-Steel-.webp", hot: true, category: "Driving" },
@@ -119,6 +122,34 @@ const Navbar = ({ onSearch }) => {
     setSelectedIndex(-1);
   };
 
+  const toggleProfileDropdown = () => {
+    setProfileDropdown(!profileDropdown);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include", // Ensures cookies are handled
+      });
+  
+      if (response.ok) {
+        // **Remove user authentication details**
+        localStorage.removeItem("jwt");
+        localStorage.removeItem("user");
+  
+        console.log("User removed from localStorage:", localStorage.getItem("user")); // Debugging step
+        setTimeout(() => {
+          navigate("/"); // Redirect after logout
+        }, 1000);
+      } else {
+        console.error("Logout failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   return (
     <>
       <div className="fixed top-0 left-0 w-full bg-[#28293d] py-2 px-6 shadow-lg z-40 flex items-center">
@@ -175,7 +206,7 @@ const Navbar = ({ onSearch }) => {
 
 
 {/* Favorite & Login */}
-<div className="flex items-center space-x-4">
+<div className="flex items-center space-x-8">
   <div className="bg-gray-700 p-2 rounded-full shadow-lg shadow-gray-900 cursor-pointer transition">
     <FaRegHeart
       size={20}
@@ -189,11 +220,37 @@ const Navbar = ({ onSearch }) => {
   >
     Log In
   </button>
-</div>
 
+{/* Profile Icon */}
+<img 
+  src="https://avatar.iran.liara.run/public/boy" 
+  alt="User Profile"
+  className="w-8 h-8 rounded-full cursor-pointer"
+  onClick={toggleProfileDropdown} 
+/>
 
+        {/* Profile Dropdown */}
+        {profileDropdown && (
+          <div className="absolute right-0 top-10 bg-[#28293d] shadow-lg p-4 rounded-md">
+            <div className="flex items-center gap-3">
+              <img
+                src="https://avatar.iran.liara.run/public/boy" // Dummy Profile Image
+                alt="Profile"
+                className="w-10 h-10 rounded-full"
+              />
+              <span className="text-white font-medium">John Doe</span> {/* Dummy Username */}
+            </div>
+            <hr className="my-2" />
+            <button
+              onClick={handleLogout}
+              className="w-full text-left text-red-600 hover:bg-gray-700 px-2 py-2 rounded-md"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
-
+      </div>
       {/* Login & Signup Modals */}
       <LoginModel open={loginOpen} setOpen={setLoginOpen} setSignupOpen={setSignupOpen} />
 <SignupModel open={signupOpen} setOpen={setSignupOpen} setLoginOpen={setLoginOpen} />
