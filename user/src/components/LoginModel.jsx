@@ -92,13 +92,15 @@ const LoginModel = ({ open, setOpen, setSignupOpen }) => {
         );
         console.log("API Response Data:", response.data); // Debugging step
 
-        const { token, ...user } = response.data; // Ensure structure
+        const { token, _id, ...user } = response.data; // Ensure structure
         console.log("User Data:", user); // Debugging step
     
         if (token && user) {
           localStorage.setItem("jwt", token);
+          localStorage.setItem("userId", _id);
           localStorage.setItem("user", JSON.stringify(user));
-    
+
+          console.log("Stored User ID:", localStorage.getItem("userId"));
           console.log("Stored User:", localStorage.getItem("user")); // Debugging step
           toast.success("Login successful! 🎮", { autoClose: 2000 });
     

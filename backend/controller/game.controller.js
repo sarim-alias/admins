@@ -152,6 +152,29 @@ export const getGameByTitle = async (req, res) => {
   }
 };
 
+// getGamesByCategory.
+export const getGamesByCategory = async (req, res) => {
+    try {
+        const { category } = req.params;
+  
+        if (!Game) {
+            console.error("Game model is not defined");
+            return res.status(500).json({ error: "Game model error" });
+        }
+  
+        const games = await Game.find({ category: { $regex: category, $options: "i" } });
+  
+        if (!games || games.length === 0) {
+            return res.status(404).json({ error: "No games found in this category" });
+        }
+  
+        res.status(200).json(games);
+    } catch (error) {
+        console.error("Error fetching games by category:", error.message);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
 // likeGame.
 export const likeGame = async (req, res) => {
     try {

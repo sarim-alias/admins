@@ -6,6 +6,9 @@ import LoginModel from "./LoginModel.jsx"; // Import LoginModel
 import SignupModel from "./SignupModel.jsx";
 import GameTabs from "./GameTabs.jsx";
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
+import axios from "axios";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Navbar = ({ onSearch }) => {
   const navigate = useNavigate();
@@ -19,6 +22,9 @@ const Navbar = ({ onSearch }) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [profileDropdown, setProfileDropdown] = useState(false);
   const dropdownRef = useRef(null);
+  const [user, setUser] = useState(null);
+  const userId = localStorage.getItem("userId");
+  const [profilePic, setProfilePic] = useState("");
 
 
   const games = [
@@ -126,6 +132,40 @@ const Navbar = ({ onSearch }) => {
     setProfileDropdown(!profileDropdown);
   };
 
+  useEffect(() => {
+    const fetchUser = async () => {
+      if (!userId) return; // Don't fetch if no user is logged in
+
+      try {
+        const response = await axios.get(`${API_BASE_URL}/api/auth/user/${userId}`, {
+          withCredentials: true,
+        });
+
+        console.log("Fetched User:", response.data); // Debugging step
+        setUser(response.data);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
+    };
+
+    fetchUser();
+  }, [userId]);
+
+  // Store and fetch profile picture from localStorage
+  useEffect(() => {
+    if (user?.profilePic) {
+      localStorage.setItem("profilePic", user.profilePic);
+      setProfilePic(user.profilePic);
+    } else {
+      const storedPic = localStorage.getItem("profilePic");
+      if (storedPic) {
+        setProfilePic(storedPic);
+      } else {
+        setProfilePic("https://avatar.iran.liara.run/public/boy"); // Default image
+      }
+    }
+  }, [user?.profilePic]); // Runs whenever user.profilePic changes
+
   const handleLogout = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
@@ -137,6 +177,7 @@ const Navbar = ({ onSearch }) => {
         // **Remove user authentication details**
         localStorage.removeItem("jwt");
         localStorage.removeItem("user");
+        localStorage.removeItem("userId");
   
         console.log("User removed from localStorage:", localStorage.getItem("user")); // Debugging step
         setTimeout(() => {
@@ -222,33 +263,44 @@ const Navbar = ({ onSearch }) => {
   </button>
 
 {/* Profile Icon */}
-<img 
-  src="https://avatar.iran.liara.run/public/boy" 
-  alt="User Profile"
-  className="w-8 h-8 rounded-full cursor-pointer"
-  onClick={toggleProfileDropdown} 
-/>
+{user && (
+  <img 
+    src={user.profilePic || "https://avatar.iran.liara.run/public/boy"} 
+    alt="User Profile"
+    className="w-8 h-8 rounded-full cursor-pointer"
+    onClick={toggleProfileDropdown} 
+  />
+)}
 
-        {/* Profile Dropdown */}
-        {profileDropdown && (
-          <div className="absolute right-0 top-10 bg-[#28293d] shadow-lg p-4 rounded-md">
-            <div className="flex items-center gap-3">
-              <img
-                src="https://avatar.iran.liara.run/public/boy" // Dummy Profile Image
-                alt="Profile"
-                className="w-10 h-10 rounded-full"
-              />
-              <span className="text-white font-medium">John Doe</span> {/* Dummy Username */}
-            </div>
-            <hr className="my-2" />
-            <button
-              onClick={handleLogout}
-              className="w-full text-left text-red-600 hover:bg-gray-700 px-2 py-2 rounded-md"
-            >
-              Logout
-            </button>
-          </div>
-        )}
+{/* Profile Dropdown */}
+{profileDropdown && (
+  <div className="absolute right-0 top-12 bg-[#28293d] shadow-lg p-4 rounded-md w-52 text-center">
+    <div className="flex flex-col items-center">
+      {/* Bigger Profile Picture */}
+      <img
+        src={user?.profilePic || "https://avatar.iran.liara.run/public/boy"} 
+        alt="Profile"
+        className="w-16 h-16 rounded-full border-2 border-white"
+      />
+      
+      {/* Username Below Image */}
+      <span className="text-white font-semibold mt-2">{user?.username || "John Doe"}</span>
+
+      {/* User Email */}
+      <span className="text-gray-400 text-sm mt-1">{user?.email || "example@email.com"}</span>
+    </div>
+
+    <hr className="my-2 border-gray-600" />
+
+    {/* Logout Button */}
+    <button
+      onClick={handleLogout}
+      className="w-full text-center text-red-500 hover:bg-gray-700 px-2 py-2 rounded-md"
+    >
+      Logout
+    </button>
+  </div>
+)}
       </div>
       </div>
       {/* Login & Signup Modals */}
