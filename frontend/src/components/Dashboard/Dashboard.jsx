@@ -27,7 +27,7 @@ const Dashboard = () => {
   const fetchGames = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/games`);
-      const data = await response.json();
+      const {data} = await response.json();
       setGames(data);
     } catch (error) {
       console.error("Error fetching games:", error);

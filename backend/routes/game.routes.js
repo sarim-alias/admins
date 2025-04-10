@@ -1,7 +1,8 @@
 // Imports.
 import express from "express";
-import { gameCreate, getAllGames, getGameById, deleteGameById, updateGameById, getGameByTitle,  likeGame, dislikeGame, getGamesByCategory } from "../controller/game.controller.js";
+import { gameCreate, getAllGames, getGameById, deleteGameById, updateGameById, getGameByTitle,  likeGame, dislikeGame, getGamesByCategory, addGameToHistory, getGameHistory } from "../controller/game.controller.js";
 import upload from "../uploads/multerConfig.js";
+import { authMiddleware } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.get("/title/:title", getGameByTitle);
 router.patch("/:id/like", likeGame);
 router.patch("/:id/dislike", dislikeGame);
 router.get("/category/:category", getGamesByCategory);
-
+router.post('/game-history', authMiddleware, addGameToHistory);
+router.get("/me/game-history",authMiddleware, getGameHistory);
 export default router;

@@ -106,3 +106,21 @@ export const getUserById = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
+export const getMe = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+  console.log(userId)
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is missing from request" });
+    }
+    const user = await User.findById(userId).select("-password").populate('gameHistory');
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.sendSuccess(user);
+  } catch (error) {
+    console.error("Error fetching user:", error.message);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};

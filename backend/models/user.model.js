@@ -29,6 +29,7 @@ const userSchema = new mongoose.Schema({
       type: Boolean,
       required: true,
     },
+    gameHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
     // createdAt, updatedAt
 }, { timestamps: true });
 

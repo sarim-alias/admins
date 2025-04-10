@@ -6,6 +6,7 @@ import authRoutes from "./routes/auth.routes.js"
 import gameRoutes from "./routes/game.routes.js"
 import connectToMongoDB from "./db/connectToMongoDB.js";
 import cors from "cors";
+import { responseSender } from "./utils/responseSender.js";
 
 // App. 
 const app = express();
@@ -16,8 +17,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware.
 app.use(express.json());
 app.use(cookieParser());
+app.use(responseSender);
 app.use(cors({
-    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://143.110.236.119:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:5173', 'http://143.110.236.119:3000', 'http://localhost:5174'],
     credentials: true
 }));
 

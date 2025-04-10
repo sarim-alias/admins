@@ -1,6 +1,7 @@
 // Imports.
 import Game from "../models/game.model.js";
 import mongoose from "mongoose";
+import User from "../models/user.model.js";
 const validCategories = ["Featured", "New", "Driving", "Casual", "2 Player"];
 
 // gameCreate.
@@ -62,7 +63,7 @@ export const getAllGames = async (req, res) => {
         const filter = category ? { category } : {};
 
         const games = await Game.find(filter);
-        res.status(200).json(games);
+        res.sendSuccess(games);
     } catch (error) {
         console.error("Error fetching games:", error.message);
         res.status(500).json({ error: "Internal Server Error" });
@@ -231,3 +232,51 @@ export const dislikeGame = async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
 };
+
+
+
+export const getGameHistory = async (req, res) => {
+    try {
+      const userId = req.user.id; 
+      if (!userId) {
+        return res.status(400).json({ error: "User ID is missing from request" });
+      }
+      const user = await User.findById(userId).select("-password").populate('gameHistory');
+  
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      res.sendSuccess(user.gameHistory);
+    } catch (error) {
+      console.error("Error fetching user:", error.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
+
+export const addGameToHistory = async (req, res) => {
+    try {
+      const userId = req.user.id; 
+      const { gameId } = req.body; 
+  
+      if (!gameId) {
+        return res.status(400).json({ error: "Game ID is required" });
+      }
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+      const gameIndex = user.gameHistory.indexOf(gameId);
+  
+      if (gameIndex !== -1) {
+        user.gameHistory.splice(gameIndex, 1);
+      }
+      user.gameHistory.unshift(gameId);
+      await user.save();
+      res.sendSuccess({ message: "Game added to history", gameHistory: user.gameHistory });
+    } catch (error) {
+      console.error("Error adding game to history:", error.message);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
+  
