@@ -4,7 +4,7 @@ import Modal from "react-modal";
 import { toast, ToastContainer } from "react-toastify";
 import { FaThumbsUp, FaThumbsDown, FaSearch } from "react-icons/fa";
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
-
+import Select from 'react-select';
 
 // Frontend.
 const Dashboard = () => {
@@ -15,7 +15,7 @@ const Dashboard = () => {
     title: "",
     description: "",
     iframeUrl: "",
-    category: "",
+    category: [],
     imageUrl: "",
   });
 
@@ -87,7 +87,11 @@ const Dashboard = () => {
       formData.append("title", currentGame.title);
       formData.append("description", currentGame.description);
       formData.append("iframeUrl", currentGame.iframeUrl);
-      formData.append("category", currentGame.category);
+      if(currentGame.category && currentGame.category.length>0){
+        currentGame.category.forEach((cat) => {
+          formData.append("category[]", cat);
+        });
+      }
 
       if (currentGame.imageFile) {
         formData.append("image", currentGame.imageFile);
@@ -113,6 +117,23 @@ const Dashboard = () => {
       toast.error("Something went wrong! ❌");
     }
   };
+  const categoryOptions = [
+    { value: 'Featured', label: 'Featured' },
+    { value: 'New', label: 'New' },
+    { value: 'Driving', label: 'Driving' },
+    { value: 'Casual', label: 'Casual' },
+    { value: '2 Player', label: '2 Player' }
+  ];
+  const handleCategoryChange = (selectedOptions) => {
+    // Extract just the values into an array of strings
+    const selectedCategories = selectedOptions.map(option => option.value);
+    
+    setCurrentGame({ 
+      ...currentGame, 
+      category: selectedCategories 
+    });
+  };
+
 
   return (
     <div className="relative min-h-screen p-5">
@@ -234,7 +255,7 @@ const Dashboard = () => {
         />
 
         {/* Dropdown for Category */}
-        <select
+        {/* <select
           value={currentGame.category}
           onChange={(e) =>
             setCurrentGame({ ...currentGame, category: e.target.value })
@@ -249,7 +270,50 @@ const Dashboard = () => {
               {cat}
             </option>
           ))}
-        </select>
+        </select> */}
+         <Select
+        isMulti
+        name="categories"
+        options={categoryOptions}
+        className="mb-2"
+        classNamePrefix="select"
+        placeholder="Select Categories"
+        value={categoryOptions.filter(option => 
+          currentGame.category.includes(option.value)
+        )}
+        onChange={handleCategoryChange}
+        styles={{
+          control: (baseStyles) => ({
+            ...baseStyles,
+            backgroundColor: '#374151', // bg-gray-700
+            borderColor: '#4B5563',
+            color: 'white',
+            padding: '2px'
+          }),
+          menu: (baseStyles) => ({
+            ...baseStyles,
+            backgroundColor: '#374151'
+          }),
+          option: (baseStyles, state) => ({
+            ...baseStyles,
+            backgroundColor: state.isFocused ? '#4B5563' : '#374151',
+            color: 'white'
+          }),
+          multiValue: (baseStyles) => ({
+            ...baseStyles,
+            backgroundColor: '#4B5563'
+          }),
+          multiValueLabel: (baseStyles) => ({
+            ...baseStyles,
+            color: 'white'
+          }),
+          placeholder: (baseStyles) => ({
+            ...baseStyles,
+            color: '#9CA3AF'
+          })
+        }}
+      />
+      
 
         <input
           type="file"

@@ -15,7 +15,7 @@ const gameSchema = new mongoose.Schema({
     type: String
   },
   category: {
-    type: String,
+    type: [String],
     required: true,
     enum: ["Featured", "New", "Driving", "Casual", "2 Player"],
   },

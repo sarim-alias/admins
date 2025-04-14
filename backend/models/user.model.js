@@ -30,6 +30,7 @@ const userSchema = new mongoose.Schema({
       required: true,
     },
     gameHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }],
+    likedGames: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Game' }]
     // createdAt, updatedAt
 }, { timestamps: true });
 

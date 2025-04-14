@@ -113,7 +113,7 @@ export const getMe = async (req, res) => {
     if (!userId) {
       return res.status(400).json({ error: "User ID is missing from request" });
     }
-    const user = await User.findById(userId).select("-password").populate('gameHistory');
+    const user = await User.findById(userId).select("-password").populate('gameHistory').populate('likedGames');
 
     if (!user) {
       return res.status(404).json({ error: "User not found" });

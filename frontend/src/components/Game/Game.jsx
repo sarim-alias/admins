@@ -4,6 +4,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { CategorySelect } from "../CategorySelect/CategorySelect ";
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
 const Game = () => {
@@ -14,7 +15,10 @@ const Game = () => {
     title: Yup.string().required("Title is required"),
     description: Yup.string().required("Description is required"),
     iframeUrl: Yup.string().url("Invalid URL format").required("iframeUrl is required"),
-    category: Yup.string().required("Category is required"),
+    category: Yup.array()
+  .of(Yup.string().required("Category cannot be empty"))
+  .min(1, "At least one category is required")
+  .required("Category is required"),
     image: Yup.mixed().required("Image is required"),
   });
 
@@ -30,7 +34,9 @@ const Game = () => {
       formData.append("title", values.title);
       formData.append("description", values.description);
       formData.append("iframeUrl", values.iframeUrl);
-      formData.append("category", values.category)
+      values.category.forEach((cat) => {
+        formData.append("category[]", cat);
+      });
       formData.append("image", selectedFile); // ✅ Append file
 
       const response = await fetch(`${API_BASE_URL}/api/games/game/create`, {
@@ -92,17 +98,13 @@ const Game = () => {
 
             {/* Category */}
             <div className="mb-4">
-              <label htmlFor="category" className="block text-gray-300 mb-1">Category</label>
-              <Field as="select" id="category" name="category" className="w-full p-2 border rounded bg-gray-700 text-white">
-                <option value="">Select Category</option>
-                <option value="Featured">Featured</option>
-                <option value="New">New</option>
-                <option value="Driving">Driving</option>
-                <option value="Casual">Casual</option>
-                <option value="2 Player">2 Player</option>
-              </Field>
-              <ErrorMessage name="category" component="p" className="text-red-400 text-sm mt-1" />
-            </div>
+      <label htmlFor="category" className="block text-gray-300 mb-1">Categories</label>
+      <Field
+        name="category"
+        component={CategorySelect}
+      />
+      <ErrorMessage name="category" component="p" className="text-red-400 text-sm mt-1" />
+    </div>
 
             {/* Image Upload */}
             <div className="mb-4">
